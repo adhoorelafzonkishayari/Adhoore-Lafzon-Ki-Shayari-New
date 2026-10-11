@@ -11,10 +11,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
 
     TextView shayariText;
+    TextToSpeech hindiVoice;
     EditText topicInput;
 
     @Override
