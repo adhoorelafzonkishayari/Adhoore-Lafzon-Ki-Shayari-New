@@ -5,24 +5,48 @@ import android.os.Bundle;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.Gravity;
-import android.view.View;
+import android.speech.tts.TextToSpeech;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.speech.tts.TextToSpeech;
+
 import java.util.Locale;
 
 public class MainActivity extends Activity {
 
-    TextView shayariText;
-    TextToSpeech hindiVoice;
-    EditText topicInput;
+    private TextView shayariText;
+    private EditText topicInput;
+    private TextToSpeech hindiVoice;
+
+    private final String sadShayari =
+            "Kabhi kabhi khamoshi bhi bahut kuch keh jaati hai,\n" +
+            "jo baat lafzon se na ho,\n" +
+            "woh aankhon se reh jaati hai.";
+
+    private final String romanticShayari =
+            "Teri muskurahat meri pehchaan ban gayi,\n" +
+            "teri har baat meri jaan ban gayi,\n" +
+            "tum mile to zindagi khoobsurat lagne lagi.";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        hindiVoice = new TextToSpeech(this, result -> {
+            if (result == TextToSpeech.SUCCESS) {
+                int languageResult =
+                        hindiVoice.setLanguage(new Locale("hi", "IN"));
+
+                if (languageResult == TextToSpeech.LANG_MISSING_DATA ||
+                    languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Toast.makeText(this,
+                            "Phone mein Hindi voice install karein.",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -30,142 +54,109 @@ public class MainActivity extends Activity {
         root.setPadding(32, 35, 32, 32);
         root.setBackgroundColor(Color.rgb(253, 247, 253));
 
-        // Title
         TextView title = new TextView(this);
         title.setText("Adhoore Lafzon Ki Shayari");
-        title.setTextSize(28);
-        title.setTextColor(Color.rgb(65, 61, 67));
+        title.setTextSize(27);
+        title.setTextColor(Color.rgb(65, 45, 80));
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         title.setGravity(Gravity.CENTER);
+        root.addView(title, new LinearLayout.LayoutParams(-1, -2));
 
-        root.addView(title,
-                new LinearLayout.LayoutParams(
-                        -1, -2
-                ));
-
-        // Subtitle
         TextView subtitle = new TextView(this);
-        subtitle.setText("AI Shayari Video Creator");
+        subtitle.setText("Hindi Shayari Voice Creator");
         subtitle.setTextSize(18);
-        subtitle.setTextColor(Color.rgb(75, 70, 78));
         subtitle.setGravity(Gravity.CENTER);
+        subtitle.setTextColor(Color.DKGRAY);
+        root.addView(subtitle);
 
-        LinearLayout.LayoutParams subParams =
-                new LinearLayout.LayoutParams(-1, -2);
-        subParams.topMargin = 10;
-        root.addView(subtitle, subParams);
-
-        // Topic input
         topicInput = new EditText(this);
         topicInput.setHint("Shayari ka topic (optional)");
-        topicInput.setTextSize(17);
         topicInput.setSingleLine(true);
 
         LinearLayout.LayoutParams inputParams =
                 new LinearLayout.LayoutParams(-1, -2);
-        inputParams.topMargin = 35;
+        inputParams.topMargin = 24;
         root.addView(topicInput, inputParams);
 
-        // Sad button
         Button sadButton = createButton("Sad Shayari");
         root.addView(sadButton);
+        sadButton.setOnClickListener(v ->
+                shayariText.setText(sadShayari));
 
-        sadButton.setOnClickListener(v -> {
-            shayariText.setText(
-                    "Kabhi kabhi khamoshi bhi bahut kuch keh jaati hai,\n" +
-                    "jo baat lafzon se na ho,\n" +
-                    "woh aankhon se reh jaati hai."
-            );
-        });
-
-        // Romantic button
         Button romanticButton = createButton("Romantic Shayari");
         root.addView(romanticButton);
+        romanticButton.setOnClickListener(v ->
+                shayariText.setText(romanticShayari));
 
-        romanticButton.setOnClickListener(v -> {
-            shayariText.setText(
-                    "Teri muskurahat meri pehchaan ban gayi,\n" +
-                    "teri har baat meri jaan ban gayi,\n" +
-                    "tum mile to laga zindagi khoobsurat hai,\n" +
-                    "warna zindagi bas ek kahani thi."
-            );
-        });
-
-        // Shayari display
         shayariText = new TextView(this);
-        shayariText.setText(
-                "Kabhi kabhi khamoshi bhi bahut kuch keh jaati hai,\n" +
-                "jo baat lafzon se na ho,\n" +
-                "woh aankhon se reh jaati hai."
-        );
-        shayariText.setTextSize(23);
-        shayariText.setTextColor(Color.rgb(65, 61, 67));
+        shayariText.setText(sadShayari);
+        shayariText.setTextSize(22);
+        shayariText.setTextColor(Color.rgb(65, 45, 80));
         shayariText.setGravity(Gravity.CENTER);
 
         LinearLayout.LayoutParams shayariParams =
                 new LinearLayout.LayoutParams(-1, -2);
-        shayariParams.topMargin = 45;
-        shayariParams.bottomMargin = 45;
-
+        shayariParams.topMargin = 28;
+        shayariParams.bottomMargin = 20;
         root.addView(shayariText, shayariParams);
 
-        // Video button
-        Button videoButton = createButton("Video Banaye");
-        root.addView(videoButton);
+        Button voiceButton = createButton("Hindi Voice Sunaye");
+        root.addView(voiceButton);
+        voiceButton.setOnClickListener(v -> {
+            String text = shayariText.getText().toString().trim();
 
-        videoButton.setOnClickListener(v -> {
-            String topic = topicInput.getText().toString().trim();
-
-            if (topic.isEmpty()) {
-                Toast.makeText(
-                        MainActivity.this,
-                        "Shayari select ho gayi. Video workflow start hoga.",
-                        Toast.LENGTH_LONG
-                ).show();
-            } else {
-                Toast.makeText(
-                        MainActivity.this,
-                        "Topic: " + topic + "\nVideo workflow start hoga.",
-                        Toast.LENGTH_LONG
-                ).show();
+            if (hindiVoice != null && !text.isEmpty()) {
+                hindiVoice.setSpeechRate(0.85f);
+                hindiVoice.setPitch(0.9f);
+                hindiVoice.speak(
+                        text,
+                        TextToSpeech.QUEUE_FLUSH,
+                        null,
+                        "shayari_voice"
+                );
             }
         });
 
-        // Status
         TextView status = new TextView(this);
         status.setText(
-                "Video workflow ready:\n" +
-                "AI voice + music + branding + social publishing integration."
+                "Branding: Adhoore Lafzon Ki Shayari\n" +
+                "Voice preview: phone ke Hindi voice engine se\n" +
+                "MP4 video generation: abhi add karna baaki hai."
         );
-        status.setTextSize(16);
-        status.setTextColor(Color.rgb(75, 70, 78));
+        status.setTextSize(15);
+        status.setTextColor(Color.DKGRAY);
         status.setGravity(Gravity.CENTER);
 
         LinearLayout.LayoutParams statusParams =
                 new LinearLayout.LayoutParams(-1, -2);
-        statusParams.topMargin = 40;
-
+        statusParams.topMargin = 28;
         root.addView(status, statusParams);
 
         setContentView(root);
     }
 
     private Button createButton(String text) {
-
         Button button = new Button(this);
         button.setText(text);
-        button.setTextSize(17);
+        button.setTextSize(16);
         button.setTextColor(Color.WHITE);
         button.setAllCaps(false);
         button.setBackgroundColor(Color.rgb(111, 79, 174));
 
         LinearLayout.LayoutParams params =
-                new LinearLayout.LayoutParams(-1, 60);
-
-        params.topMargin = 14;
-
+                new LinearLayout.LayoutParams(-1, 58);
+        params.topMargin = 12;
         button.setLayoutParams(params);
 
         return button;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (hindiVoice != null) {
+            hindiVoice.stop();
+            hindiVoice.shutdown();
+        }
+        super.onDestroy();
     }
 }
